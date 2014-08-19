@@ -1,0 +1,159 @@
+<%-- 
+    Document   : apresentaQ
+    Created on : 08/04/2014, 08:18:56
+    Author     : Alex de Paiva
+--%>
+
+<%@page import="java.lang.Integer"%>
+<%@page import="java.sql.Statement"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.DriverManager"%>
+<%@page import="java.sql.Connection"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>JSP Page</title>
+<style>
+html {
+	width: 100%;
+	height: 100%;
+	border: 0px;
+	background-image: url("imagens/grama.jpg");
+	background-repeat: repeat-y;
+	background-position: right bottom;
+}
+
+body {
+	width: 100%;
+	height: 80px;
+	padding: 4px;
+	border: 2px;
+	background: green;
+	background-position: right;
+}
+
+#op {
+	color: white;
+}
+</style>
+</head>
+<body>
+
+
+	<form name="apresenta" method="POST"
+		action="apresentaQ.jsp?acao=apresentacao">
+
+		<h1 id="op">Questões</h1>
+
+		<%
+			int old_acertos = 0;
+			int old_erros = 0;
+			int cq = 1;
+			int acerto = 0;
+			int erro = 0;
+			int nivel = 0;
+			int contador = 0;
+			int contador2 = 0;
+			int old_pontos = 0;
+			
+			Connection connection;
+			
+			try {
+
+				String connectionURL = "jdbc:mysql://localhost:3306/zoogame";
+				connection = null;
+				Class.forName("com.mysql.jdbc.Driver").newInstance();
+				connection = DriverManager.getConnection(connectionURL, "root",
+						"a99l10e63x46");
+				Statement stm = connection.createStatement();
+				Statement stm2 = connection.createStatement();
+				Statement stm3 = connection.createStatement();
+				Statement stm4 = connection.createStatement();
+				
+				ResultSet rs = stm.executeQuery("SELECT * from questions");
+
+				//ResultSet rs1 = stm.executeQuery("SELECT * from cadastros where ID = 1");
+
+				while (rs.next())
+
+				{
+		%>
+		<br> Pergunta:
+		<%=rs.getString("pergunta")%>
+		<br> Alternativas:<br> <input
+			type="radio" name="alte<%=cq%>" value="A" />A:
+		<%=rs.getString("alternativaA")%><br> <input type="radio"
+			name="alte<%=cq%>" value="B" />B:
+		<%=rs.getString("alternativaB")%><br> <input type="radio"
+			name="alte<%=cq%>" value="C" />C:
+		<%=rs.getString("alternativaC")%><br> <input type="radio"
+			name="alte<%=cq%>" value="D" />D:
+		<%=rs.getString("alternativaD")%><br> <input type="radio"
+			name="alte<%=cq%>" value="E" />E:
+		<%=rs.getString("alternativaE")%><br> <br> <br>
+
+
+
+
+
+		<%
+			if (request.getMethod().equalsIgnoreCase("POST")) {
+						String d = rs.getString(7);
+						//out.println(d);
+						//out.println(request.getParameter("alte"+cq));
+						//out.println("Antes");
+						String x = request.getParameter("alte" + cq);
+						if (d.equalsIgnoreCase(x)) {
+							//String c = rs.getString("SELECT correta from questions where num_questao = 26"+request.getParameter("numero"));
+							//out.println(d);
+							out.println("Correto" + acerto);
+							//stm.executeUpdate("insert into cadastro (acertos) values ('"+request.getParameter(Integer.toString(acerto))+"')");
+							acerto++;
+							//if(c.equals("C")){}
+							//   out.print("resposta correta");
+						} else {
+							out.println("Errado! "+ erro);
+							//stm.executeUpdate("insert into cadastro (erros) values ('"+request.getParameter(Integer.toString(erro))+"')");
+							erro++;
+						}
+					}
+					cq++;
+				}
+
+				
+
+				ResultSet rs2 = stm2.executeQuery("SELECT acertos, erros from cadastro where ID=45");
+				
+				while(rs2.next()){
+					old_acertos = rs2.getInt(1);
+					old_erros = rs2.getInt(2);
+				}
+				
+				out.println("==================================\n acertos: " + old_acertos);
+				out.println("==================================\n erros: " + old_erros);
+
+				
+				Statement stmtup = connection.createStatement();
+				int is = stmtup.executeUpdate("update cadastro"
+						+ " set acertos = " + (old_acertos + acerto) + " , "
+						+ " erros  = " + (old_erros + erro) + " where ID = 45");
+				rs2 = stmtup.getResultSet();
+				// out.println(is);
+				
+				
+				out.println(" acertos = " + acerto);
+				out.println(" erros = " + erro);
+				
+			
+			} catch (Exception ex) {
+				out.println("Fim Programa");
+				//out.println(request.getParameter("alte"));
+				//out.println("Unable to connect to database"+ex);
+			}
+		%>
+		<input type="submit" value="OK" name="botao16" />
+	</form>
+</body>
+</html>
